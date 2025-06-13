@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student  Student?
+  lecturer Lecturer?
+
+  @@map("users")
+}
+
+enum UserRole {
+  STUDENT
+  LECTURER
+  ADMIN
+}
+
+model Student {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @unique @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  matricNo   String   @unique
+  department String
+  level      Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  enrollments Enrollment[]
+  results     Result[]
+
+  @@map("students")
+}
+
+model Lecturer {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @unique @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  staffId    String   @unique
+  department String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  courses Course[]
+  results Result[]
+
+  @@map("lecturers")
+}
+
+model Course {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  code        String   @unique
+  title       String
+  description String?
+  creditUnits Int
+  level       Int
+  department String
+  semester    Semester
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lecturerId  String?      @db.ObjectId
+  lecturer    Lecturer?    @relation(fields: [lecturerId], references: [id])
+  enrollments Enrollment[]
+  results     Result[]
+
+  @@map("courses")
+}
+
+enum Semester {
+  FIRST
+  SECOND
+}
+
+model Enrollment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  studentId String   @db.ObjectId
+  courseId  String   @db.ObjectId
+  session   String // e.g., "2023/2024"
+  semester  Semester
+  createdAt DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id])
+  course  Course  @relation(fields: [courseId], references: [id])
+  result  Result?
+
+  @@unique([studentId, courseId, session])
+  @@map("enrollments")
+}
+
+model Result {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  enrollmentId String     @unique @db.ObjectId
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id])
+  courseId     String     @db.ObjectId
+  studentId    String     @db.ObjectId
+  lecturerId   String     @db.ObjectId
+  score        Float
+  grade        String
+  remarks      String?
+  published    Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  course   Course   @relation(fields: [courseId], references: [id])
+  student  Student  @relation(fields: [studentId], references: [id])
+  lecturer Lecturer @relation(fields: [lecturerId], references: [id])
+
+  @@map("results")
+}
