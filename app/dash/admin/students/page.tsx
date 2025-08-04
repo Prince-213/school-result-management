@@ -1,4 +1,5 @@
-"use client";
+export const dynamic = "force-dynamic";
+("use client");
 
 import { useActionState, useEffect, useState } from "react";
 import { DashboardHeader } from "@/components/dashboard-header";
@@ -10,7 +11,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@/components/ui/table";
 import {
   Dialog,
@@ -19,7 +20,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Edit, Plus, Search, Trash2 } from "lucide-react";
@@ -33,7 +34,7 @@ interface ApiResponse {
 }
 
 const initialState = {
-  message: ""
+  message: "",
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());

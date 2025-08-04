@@ -12,7 +12,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import {
   Table,
@@ -20,13 +20,13 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { Download, Search, Filter, FileText, Printer } from "lucide-react";
 
-import { Course, Enrollment, Student } from "@/types";
+import { Course, Enrollment, Lecturer, Student } from "@/types";
 import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -43,7 +43,7 @@ export default function StudentResultsPage() {
   const {
     data: studentData,
     isLoading: studentDataIsLoading,
-    error: studentError
+    error: studentError,
   } = useSWR<{
     data: Student;
   }>("/api/getStudent", fetcher);
@@ -56,7 +56,7 @@ export default function StudentResultsPage() {
   const {
     data: coursesData,
     isLoading: coursesDataIsLoading,
-    error
+    error,
   } = useSWR<{
     data: Course[];
   }>("/api/getCourses", fetcher);
@@ -64,9 +64,9 @@ export default function StudentResultsPage() {
   const {
     data: lecturersData,
     isLoading: lecturersDataIsLoading,
-    error: lecturersError
+    error: lecturersError,
   } = useSWR<{
-    data: Course[];
+    data: Lecturer[];
   }>("/api/getLecturers", fetcher);
 
   // Mock student ID
@@ -101,7 +101,7 @@ export default function StudentResultsPage() {
         "C-": 1.3,
         "D+": 1.0,
         D: 0.7,
-        F: 0.0
+        F: 0.0,
       };
       return sum + (gradePoints[result.grade] || 0);
     }, 0);
@@ -351,8 +351,8 @@ export default function StudentResultsPage() {
                           {result.grade}
                         </span>
                       </TableCell>
-                      <TableCell></TableCell>
-                      <TableCell></TableCell>
+                      <TableCell>{result.enrollment.semester}</TableCell>
+                      <TableCell>{result.createdAt}</TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm">
                           <FileText className="h-4 w-4" />
